@@ -1,0 +1,41 @@
+name: build
+
+on: workflow_dispatch
+
+jobs:
+  build-job:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: checkout ci
+        uses: actions/checkout@v2
+        with:
+          path: srcroot
+
+      - name: checkout rpi-newer-crosstools
+        uses: actions/checkout@v2
+        with:
+          repository: rvagg/rpi-newer-crosstools
+          path: rpi-newer-crosstools
+
+      - name: prepare out directory
+        run: mkdir -p out
+        shell: bash
+
+      - name: linux packages
+        run: sudo apt-get install -y p7zip-full xz-utils
+        shell: bash
+
+      - name: bundle gcc 8.3.0
+        run: tar -cJf ../out/x64-gcc-8.3.0.tar.xz x64-gcc-8.3.0
+        working-directory: rpi-newer-crosstools
+        shell: bash
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ci-artifact
+          if-no-files-found: error
+          retention-days: 3
+          path: |
+            out/*.tar.xz
