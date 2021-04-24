@@ -70,3 +70,4 @@ jobs:
           path: |
             out/*.tar.xz
             out/*.tgz
+            out/*.zip
