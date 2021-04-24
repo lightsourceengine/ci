@@ -28,7 +28,7 @@ jobs:
 
       - name: bundle gcc 8.3.0
         run: |
-          cp ../bin/cross x64-gcc-8.3.0/arm-rpi-linux-gnueabihf/bin
+          cp ../srcroot/bin/cross x64-gcc-8.3.0/arm-rpi-linux-gnueabihf/bin
           tar -cJf ../out/x64-gcc-8.3.0.tar.xz x64-gcc-8.3.0
         working-directory: rpi-newer-crosstools
         shell: bash
