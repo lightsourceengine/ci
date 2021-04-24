@@ -19,7 +19,7 @@ jobs:
           path: rpi-newer-crosstools
 
       - name: prepare out directory
-        run: mkdir -p out
+        run: mkdir -p out scratch
         shell: bash
 
       - name: linux packages
@@ -31,6 +31,22 @@ jobs:
         working-directory: rpi-newer-crosstools
         shell: bash
 
+      - name: SDL2.framework
+        run: |
+          wget https://www.libsdl.org/release/SDL2-2.0.14.dmg
+          7z x SDL2-2.0.14.dmg
+          cd SDL2
+          tar -czf ../out/SDL2.framework.tgz SDL2.framework
+        working-directory: scratch
+
+      - name: SDL2_mixer.framework
+        run: |
+          wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.4.dmg
+          7z x SDL2_mixer-2.0.4.dmg
+          cd SDL2_mixer
+          tar -czf ../out/SDL2_mixer.framework.tgz SDL2_mixer.framework
+        working-directory: scratch
+
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -39,3 +55,4 @@ jobs:
           retention-days: 3
           path: |
             out/*.tar.xz
+            out/*.tgz
