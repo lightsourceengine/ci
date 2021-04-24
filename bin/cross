@@ -32,7 +32,7 @@ with_arm32_toolchain () {
   if [[ -z "$CROSS_TOOLCHAIN_VERSION" ]]; then
     local GCC_POSTFIX=""
   else
-    local GCC_POSTFIX="${CROSS_TOOLCHAIN_VERSION}-"
+    local GCC_POSTFIX="-${CROSS_TOOLCHAIN_VERSION}"
   fi
 
   export CC="${PREFIX}gcc${GCC_POSTFIX} ${FLAGS}"
@@ -59,7 +59,7 @@ with_arm64_toolchain () {
   if [[ -z "$CROSS_TOOLCHAIN_VERSION" ]]; then
     local GCC_POSTFIX=""
   else
-    local GCC_POSTFIX="${CROSS_TOOLCHAIN_VERSION}-"
+    local GCC_POSTFIX="-${CROSS_TOOLCHAIN_VERSION}"
   fi
 
   export CC="${PREFIX}gcc${GCC_POSTFIX} ${FLAGS}"
