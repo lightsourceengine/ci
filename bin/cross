@@ -1,0 +1,131 @@
+#!/usr/bin/env sh
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
+
+usage () {
+  echo "Usage: cross <device profile or arch> <node addon build> [package manager arguments]"
+  echo "Help: Invokes node-gyp with environment variable configuration for cross compiling from Ubuntu 16+ x64 to ARM devices."
+  echo ""
+  echo "where 'device profile' is one of:"
+  echo "    rpi, rpizero, nclassic, psclassic"
+  echo "where 'arch' is one of:"
+  echo "    armv6l, armv7l, arm64, aarch64"
+  echo "where 'node addon build' is one of:"
+  echo "    yarn, npm, node-gyp, npm-node-gyp"
+}
+
+exit_with_error () {
+  echo "Error: $1"
+  usage
+  exit 1
+}
+
+with_arm32_toolchain () {
+  local FLAGS="$1"
+
+  if [[ -z "$CROSS_TOOLCHAIN_PREFIX" ]]; then
+    local PREFIX=""
+  else
+    local PREFIX="${CROSS_TOOLCHAIN_PREFIX}-" 
+  fi
+
+  if [[ -z "$CROSS_TOOLCHAIN_VERSION" ]]; then
+    local GCC_POSTFIX=""
+  else
+    local GCC_POSTFIX="${CROSS_TOOLCHAIN_VERSION}-"
+  fi
+
+  export CC="${PREFIX}gcc${GCC_POSTFIX} ${FLAGS}"
+  export CXX="${PREFIX}g++${GCC_POSTFIX} ${FLAGS}"
+  export LINK="${PREFIX}g++${GCC_POSTFIX} ${FLAGS}"
+  export AR=${PREFIX}ar
+  export RANLIB=${PREFIX}ranlib
+  export STRIP=${PREFIX}strip
+  export OBJCOPY=${PREFIX}objcopy
+  export OBJDUMP=${PREFIX}objdump
+  export NM=${PREFIX}nm
+  export AS=${PREFIX}as
+}
+
+with_arm64_toolchain () {
+  local FLAGS="$1"
+
+  if [[ -z "$CROSS_TOOLCHAIN_PREFIX" ]]; then
+    local PREFIX=""
+  else
+    local PREFIX="${CROSS_TOOLCHAIN_PREFIX}-"
+  fi
+
+  if [[ -z "$CROSS_TOOLCHAIN_VERSION" ]]; then
+    local GCC_POSTFIX=""
+  else
+    local GCC_POSTFIX="${CROSS_TOOLCHAIN_VERSION}-"
+  fi
+
+  export CC="${PREFIX}gcc${GCC_POSTFIX} ${FLAGS}"
+  export CXX="${PREFIX}g++${GCC_POSTFIX} ${FLAGS}"
+  export LINK="${PREFIX}g++${GCC_POSTFIX} ${FLAGS}"
+  export AR=${PREFIX}ar
+  export RANLIB=${PREFIX}ranlib
+  export STRIP=${PREFIX}strip
+  export OBJCOPY=${PREFIX}objcopy
+  export OBJDUMP=${PREFIX}objdump
+  export NM=${PREFIX}nm
+  export AS=${PREFIX}as
+}
+
+case $1 in
+  rpizero)
+    with_arm32_toolchain "-march=armv6zk -mcpu=arm1176jzf-s -mfloat-abi=hard -mfpu=vfp"
+  ;;
+  rpi)
+    with_arm32_toolchain "-march=armv7-a -mfloat-abi=hard -mfpu=neon"
+  ;;
+  nclassic)
+    with_arm32_toolchain "-march=armv7-a -mtune=cortex-a7 -mfloat-abi=hard -mfpu=neon"
+  ;;
+  psclassic)
+    with_arm32_toolchain "-march=armv7-a -mtune=cortex-a35 -mfloat-abi=hard -mfpu=neon"
+  ;;
+  armv6l)
+    with_arm32_toolchain "-march=${CROSS_COMPILER_ARCH:-armv6zk} ${CROSS_COMPILER_FLAGS:--mfloat-abi=hard -mfpu=vfp}"
+  ;;
+  armv7l)
+    with_arm32_toolchain "-march=${CROSS_COMPILER_ARCH:-armv7-a} ${CROSS_COMPILER_FLAGS:--mfloat-abi=hard -mfpu=neon}"
+  ;;
+  aarch64|arm64)
+    if [ -n "$CROSS_COMPILER_ARCH" ]; then
+      MARCH_FLAG="-march=${CROSS_COMPILER_ARCH}"
+    fi
+    with_arm64_toolchain "${MARCH_FLAG} ${CROSS_COMPILER_FLAGS}"
+  ;;
+  *)
+    exit_with_error "First argument must be a device profile or arch."
+  ;;
+esac
+
+shift
+
+case $1 in yarn|npm|node-gyp|npm-node-gyp)
+    NODE_ADDON_BUILD=$1
+  ;;
+  *)
+    exit_with_error "Unsupported node build tool: $1."
+  ;;
+esac
+
+shift
+
+# cross compiling is not explicitly supported by node-gyp, but the configuration can be massaged to get cross
+# compiling working.
+#
+# ~/.node-gyp/.../common.gypi sets an incorrect -march flag based on these variables. if set to "unknown" or
+# an unsupported value, -march will not be set and CFLAGS and LDFLAGS can be stuffed into the CC and CXX
+# environment variables.
+#
+# Note, the build directory will be missing the arch folder due to the "unknown" arch value.
+
+export npm_config_target_arch=unknown
+export npm_config_arch=unknown
+
+command ${NODE_ADDON_BUILD} "$@"
