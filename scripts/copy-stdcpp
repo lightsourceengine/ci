@@ -1,0 +1,6 @@
+#!/bin/bash
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
+SYSROOT_PATH="${SCRIPT_DIR}/../arm-rpi-linux-gnueabihf/sysroot/lib"
+
+cp -a "${SYSROOT_PATH}/libstdc++.so" "${SYSROOT_PATH}/libstdc++.so.6" "${SYSROOT_PATH}/libstdc++.so.6.0.25" "$1"
