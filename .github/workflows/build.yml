@@ -33,6 +33,13 @@ jobs:
         working-directory: rpi-newer-crosstools
         shell: bash
 
+      - name: bundle gcc 6.5.0
+        run: |
+          cp -a ../srcroot/scripts/copy-stdcpp ../srcroot/bin/cross x64-gcc-6.5.0/arm-rpi-linux-gnueabihf/bin
+          tar -cJf ../out/x64-gcc-6.5.0.tar.xz x64-gcc-6.5.0
+        working-directory: rpi-newer-crosstools
+        shell: bash
+
       - name: SDL2.framework
         run: |
           wget https://www.libsdl.org/release/SDL2-2.0.14.dmg
