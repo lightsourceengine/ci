@@ -39,11 +39,7 @@ if [ -d "${TARGET_ROOT}" ]; then
   rm -r "${TARGET_ROOT}"/*
 fi
 
-mkdir -p "${TARGET_ROOT}/include/SDL2"
-mkdir -p "${TARGET_ROOT}/lib"
-
-cp -L "${SDL_SRC_ROOT}/build/.libs/libSDL2-2.0.so.0" "${TARGET_ROOT}/lib"
-cp -r "${SDL_SRC_ROOT}/include/"* "${TARGET_ROOT}/include/SDL2"
-strip "${TARGET_ROOT}/lib/libSDL2-2.0.so.0"
+cp -L "${SDL_SRC_ROOT}/build/.libs/libSDL2-2.0.so.0" "${TARGET_ROOT}/libSDL2.so"
+strip "${TARGET_ROOT}/libSDL2.so"
 
 tar -czf "${TARGET}.tar.gz" ${TARGET}
